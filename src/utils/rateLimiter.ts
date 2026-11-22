@@ -4,28 +4,55 @@ interface RateLimitRecord {
 
 /**
  * Sliding Window Rate Limiter for API Route Protection.
- * Default: 20 requests per minute per IP address.
+ *
+ * Tracks request counts per key (e.g. client IP) within a rolling time window
+ * using an in-memory Map. Timestamps outside the window are pruned on each
+ * call so memory stays bounded.
+ *
+ * @example
+ * const limiter = new SlidingWindowRateLimiter(60_000, 20);
+ * const { limited } = limiter.isRateLimited("127.0.0.1");
+ *
+ * @remarks
+ * **Important:** This limiter is in-process and in-memory only. In a serverless
+ * deployment (Vercel Edge / Lambda) each cold-start creates a fresh instance,
+ * so rate-limit state is NOT shared across instances or persisted between
+ * invocations. For distributed rate limiting use an external store (Redis,
+ * Upstash, etc.).
  */
 export class SlidingWindowRateLimiter {
-  private windowMs: number;
-  private maxRequests: number;
-  private hits: Map<string, RateLimitRecord>;
+  private readonly windowMs: number;
+  private readonly maxRequests: number;
+  private readonly hits: Map<string, RateLimitRecord>;
 
-  constructor(windowMs = 60000, maxRequests = 20) {
+  /**
+   * @param windowMs     Rolling window size in milliseconds (default 60 000 ms = 1 minute).
+   * @param maxRequests  Maximum allowed requests inside the window (default 20).
+   */
+  constructor(windowMs = 60_000, maxRequests = 20) {
     this.windowMs = windowMs;
     this.maxRequests = maxRequests;
     this.hits = new Map();
   }
 
+  /**
+   * Checks whether `key` has exhausted its quota.
+   * Records the current timestamp on each non-limited call.
+   *
+   * @returns An object with:
+   *   - `limited`   – true if the caller should be rejected.
+   *   - `remaining` – requests still available in the current window.
+   *   - `resetMs`   – milliseconds until the oldest in-window timestamp expires.
+   */
   isRateLimited(key: string): {
     limited: boolean;
     remaining: number;
     resetMs: number;
   } {
     const now = Date.now();
-    const record = this.hits.get(key) || { timestamps: [] };
+    const record = this.hits.get(key) ?? { timestamps: [] };
 
-    // Filter out timestamps outside the active sliding window
+    // Prune timestamps that have fallen outside the sliding window.
     const validTimestamps = record.timestamps.filter(
       (timestamp) => now - timestamp < this.windowMs
     );
@@ -46,9 +73,15 @@ export class SlidingWindowRateLimiter {
     };
   }
 
+  /** Clears all tracked request records. Useful for testing. */
   reset(): void {
     this.hits.clear();
   }
 }
 
-export const globalRateLimiter = new SlidingWindowRateLimiter(60000, 20);
+/**
+ * Process-singleton rate limiter instance used by the `/api/analyze` route.
+ *
+ * @see {@link SlidingWindowRateLimiter} for in-memory caveats in serverless deployments.
+ */
+export const globalRateLimiter = new SlidingWindowRateLimiter(60_000, 20);

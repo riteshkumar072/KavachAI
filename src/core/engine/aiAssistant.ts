@@ -8,7 +8,14 @@ import {
 } from "@/types/kavach";
 import { getPersonaConfig } from "../context/personaRules";
 
-const CATEGORY_DISPLAY_NAMES: Record<ThreatVectorCategory, string> = {
+/**
+ * Human-readable display names for every {@link ThreatVectorCategory}.
+ * Used in both the Tier-1 fallback synthesizer and the Tier-2 AI prompt.
+ *
+ * Defined once here rather than duplicated across modules; import from this
+ * file when you need to convert a category enum value to a display label.
+ */
+export const CATEGORY_DISPLAY_NAMES: Record<ThreatVectorCategory, string> = {
   AUTHORITY_IMPERSONATION: "Authority Impersonation",
   COERCIVE_URGENCY: "Coercive Urgency & Pressure",
   ISOLATION_SECRECY: "Isolation & Secrecy Coercion",

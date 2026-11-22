@@ -1,10 +1,30 @@
 import { SupportedLanguage, ThreatLevel } from "@/types/kavach";
 
+/**
+ * Module-level guard to prevent repeated CRITICAL alerts within the same session.
+ *
+ * @remarks
+ * This is intentionally a module singleton so the guard survives React re-renders.
+ * Call {@link resetVoiceAlertState} in cleanup effects or tests to reset it.
+ */
 let lastAlertedLevel: ThreatLevel | null = null;
 
 /**
- * Spoken Voice Alert using browser-native Web Speech Synthesis.
- * Speaks once when threat level escalates to CRITICAL to warn the user without spamming.
+ * Resets the duplicate-alert guard. Call this when the user starts a new call
+ * session or in test teardowns so alerts fire fresh.
+ */
+export function resetVoiceAlertState(): void {
+  lastAlertedLevel = null;
+}
+
+/**
+ * Triggers a spoken CRITICAL threat warning via browser Web Speech Synthesis.
+ * Silently no-ops in SSR, in browsers without the API, or when the same level
+ * was already announced (unless `force` is true).
+ *
+ * @param level    - Current threat level (only "CRITICAL" triggers speech).
+ * @param language - UI language; "hi" plays a Hindi utterance, "en" plays English.
+ * @param force    - When true, bypasses the duplicate-alert guard.
  */
 export function triggerThreatVoiceAlert(
   level: ThreatLevel,
@@ -34,7 +54,10 @@ export function triggerThreatVoiceAlert(
 }
 
 /**
- * Reads aloud the tailored exit script so a senior citizen or user can hear what to say.
+ * Reads aloud the tailored exit script so the user can hear what to say to disengage.
+ *
+ * @param text     - The script text to synthesize.
+ * @param language - Language for the utterance voice ("hi" = Hindi, "en" = English).
  */
 export function speakScript(
   text: string,
@@ -51,6 +74,7 @@ export function speakScript(
   window.speechSynthesis.speak(utterance);
 }
 
+/** Immediately cancels any in-progress speech synthesis utterance. */
 export function stopSpeech(): void {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();

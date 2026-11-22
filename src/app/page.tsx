@@ -215,6 +215,7 @@ export default function Home() {
                 totalLatencyMs: 0,
                 llmCalled: false,
                 cacheHit: false,
+                language,
               }
             }
             personaLabel={personaConfig.label}

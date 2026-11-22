@@ -33,6 +33,15 @@ interface SpeechRecognitionEvent {
 
 export function useSpeechInput(
   language: SupportedLanguage = "en",
+  /**
+   * Callback fired whenever the transcript text changes.
+   *
+   * @remarks
+   * The caller **must** pass a stable (memoized) reference — e.g. wrapped in
+   * `useCallback` — to avoid restarting the SpeechRecognition instance on
+   * every render.  Passing an inline function literal here will cause the
+   * `useEffect` that re-initialises recognition to run continuously.
+   */
   onTranscriptChange?: (text: string) => void
 ) {
   const [isListening, setIsListening] = useState<boolean>(false);

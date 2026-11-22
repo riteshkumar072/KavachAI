@@ -1,5 +1,15 @@
 import { UserPersonaId } from "@/types/kavach";
 
+/**
+ * Maps each {@link UserPersonaId} to the scenario IDs most relevant for that
+ * persona, enabling O(1) lookup instead of a linear filter over {@link SCENARIOS}.
+ */
+export const PERSONA_TO_SCENARIO_IDS: Record<UserPersonaId, string[]> = {
+  senior_citizen: ["digital_arrest_cbi", "safe_bank_call"],
+  college_student: ["fedex_customs"],
+  small_merchant: ["upi_merchant_trap"],
+};
+
 export interface ScenarioLine {
   text: string;
   speaker: string;

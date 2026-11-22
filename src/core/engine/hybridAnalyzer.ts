@@ -38,7 +38,6 @@ export async function analyzeHybrid(
   language: SupportedLanguage = "en"
 ): Promise<UnifiedAnalysisResult> {
   const overallStart = performance.now();
-  void language; // Retained for multi-lingual contextual telemetry
 
   // Step 1: Pre-LLM Local PII Redaction
   const redaction = redactPII(text);
@@ -77,6 +76,7 @@ export async function analyzeHybrid(
         totalLatencyMs: totalElapsed,
         llmCalled: false,
         cacheHit: false,
+        language,
       },
     };
   }
@@ -97,6 +97,7 @@ export async function analyzeHybrid(
         ...cached.result.telemetry,
         totalLatencyMs: totalElapsed,
         cacheHit: true,
+        language,
       },
     };
   }
@@ -133,6 +134,7 @@ export async function analyzeHybrid(
       totalLatencyMs: totalElapsed,
       llmCalled: !fallbackUsed,
       cacheHit: false,
+      language,
     },
   };
 

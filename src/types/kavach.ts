@@ -79,5 +79,7 @@ export interface UnifiedAnalysisResult {
     totalLatencyMs: number;
     llmCalled: boolean;
     cacheHit: boolean;
+    /** Language in use at analysis time — forwarded for multi-lingual telemetry. */
+    language: SupportedLanguage;
   };
 }

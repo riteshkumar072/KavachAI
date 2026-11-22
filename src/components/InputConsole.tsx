@@ -15,7 +15,7 @@ import {
 import { useLiveSimulator } from "@/hooks/useLiveSimulator";
 import { useSpeechInput } from "@/hooks/useSpeechInput";
 import { SCENARIOS } from "@/core/simulator/scenarios";
-import { UserPersonaId } from "@/types/kavach";
+import type { UserPersonaId } from "@/types/kavach";
 
 interface InputConsoleProps {
   activeTab: "simulator" | "mic" | "paste";
@@ -26,7 +26,7 @@ interface InputConsoleProps {
   onPastedTextChange: (text: string) => void;
   onAnalyzePasted: () => void;
   isAnalyzing: boolean;
-  onScenarioSelect?: (scenarioId: string, targetPersona: UserPersonaId) => void;
+  onScenarioSelect: (scenarioId: string, targetPersona: UserPersonaId) => void;
 }
 
 export const InputConsole: React.FC<InputConsoleProps> = ({
@@ -108,12 +108,7 @@ export const InputConsole: React.FC<InputConsoleProps> = ({
                 <button
                   key={sc.id}
                   onClick={() => {
-                    if (onScenarioSelect) {
-                      onScenarioSelect(sc.id, sc.targetPersona);
-                    } else {
-                      simulator.reset();
-                      simulator.start(sc.id);
-                    }
+                    onScenarioSelect(sc.id, sc.targetPersona);
                   }}
                   className={`text-left p-3 rounded-lg border transition-all flex flex-col justify-between ${
                     isSelected
