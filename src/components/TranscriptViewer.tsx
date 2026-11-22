@@ -16,34 +16,34 @@ const CATEGORY_STYLES: Record<
   { bg: string; text: string; border: string; label: string }
 > = {
   AUTHORITY_IMPERSONATION: {
-    bg: "bg-rose-950/70",
+    bg: "bg-rose-500/15",
     text: "text-rose-300",
-    border: "border-rose-500/40",
+    border: "border-rose-500/30",
     label: "Fake Authority",
   },
   COERCIVE_URGENCY: {
-    bg: "bg-amber-950/70",
+    bg: "bg-amber-500/15",
     text: "text-amber-300",
-    border: "border-amber-500/40",
-    label: "Artificial Urgency",
+    border: "border-amber-500/30",
+    label: "Coercive Urgency",
   },
   ISOLATION_SECRECY: {
-    bg: "bg-purple-950/70",
+    bg: "bg-purple-500/15",
     text: "text-purple-300",
-    border: "border-purple-500/40",
+    border: "border-purple-500/30",
     label: "Isolation Coercion",
   },
   FINANCIAL_EXTRACTION: {
-    bg: "bg-red-950/80",
-    text: "text-red-300",
-    border: "border-red-500/50",
-    label: "PIN / Fund Extraction",
+    bg: "bg-rose-500/20",
+    text: "text-rose-200",
+    border: "border-rose-500/40",
+    label: "Fund / PIN Extraction",
   },
   LEGAL_FEAR_MONGERING: {
-    bg: "bg-orange-950/70",
-    text: "text-orange-300",
-    border: "border-orange-500/40",
-    label: "Legal Fear Tactic",
+    bg: "bg-amber-500/15",
+    text: "text-amber-300",
+    border: "border-amber-500/30",
+    label: "Legal Intimidation",
   },
 };
 
@@ -57,22 +57,21 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
 
   if (!text || text.trim().length === 0) {
     return (
-      <section className="glass-panel p-4 flex flex-col items-center justify-center min-h-[220px] text-zinc-500 text-xs">
-        <ShieldCheck className="w-8 h-8 text-zinc-600 mb-2" />
+      <section className="enterprise-card p-5 flex flex-col items-center justify-center min-h-[220px] text-zinc-500 text-xs">
+        <ShieldCheck className="w-[18px] h-[18px] text-zinc-600 mb-2" strokeWidth={1.75} />
         <p className="font-medium text-zinc-400">Live Transcript Inactive</p>
-        <p className="text-[11px] text-zinc-600 mt-1 max-w-xs text-center">
-          Start the 1-Click Simulator, activate your microphone, or paste a message to begin real-time threat scanning.
+        <p className="text-[11px] text-zinc-600 mt-1 max-w-xs text-center font-mono">
+          Activate call simulator or microphone to begin real-time vector analysis.
         </p>
       </section>
     );
   }
 
-  // Segment the text into highlighted spans and normal text
-  // Sort evidences by startIndex to construct non-overlapping intervals
+  // Sort evidences by startIndex to segment text into non-overlapping spans
   const sortedEvidences = [...evidences].sort((a, b) => a.startIndex - b.startIndex);
 
   interface Segment {
-    type: "text" | "evidence" | "redacted";
+    type: "text" | "evidence";
     content: string;
     evidence?: MatchedEvidence;
   }
@@ -81,7 +80,6 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
   let currentIndex = 0;
 
   for (const ev of sortedEvidences) {
-    // Avoid overlap if earlier match already covered this
     if (ev.startIndex < currentIndex) continue;
 
     if (ev.startIndex > currentIndex) {
@@ -108,35 +106,34 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
   }
 
   return (
-    <section className="glass-panel p-4 flex flex-col gap-3">
-      <div className="flex items-center justify-between border-b border-white/10 pb-2">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-xs text-white uppercase tracking-wider">
-            Live Streamed Transcript
+    <section className="enterprise-card p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5">
+        <div className="flex items-center gap-2.5">
+          <span className="font-medium text-xs text-zinc-200 tracking-tight">
+            Live Stream Transcript
           </span>
           {isStreaming && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-red-950/80 text-red-400 border border-red-500/30 animate-pulse font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-              LIVE SCANNING
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
+              SCANNING
             </span>
           )}
         </div>
 
         {evidences.length > 0 && (
-          <span className="text-[11px] text-red-400 font-medium">
-            {evidences.length} threat indicator{evidences.length > 1 ? "s" : ""} flagged
+          <span className="text-[11px] text-rose-400 font-mono tabular-nums font-medium">
+            {evidences.length} threat signal{evidences.length > 1 ? "s" : ""}
           </span>
         )}
       </div>
 
-      {/* Transcript Text Box with Inline Color-Coded Spans */}
+      {/* Transcript Stream Box */}
       <div
-        className="p-3.5 rounded-lg bg-zinc-950/80 border border-white/10 text-sm leading-relaxed min-h-[160px] font-sans relative"
+        className="p-4 rounded-lg bg-[#0B0D11] border border-zinc-800/80 text-xs font-mono leading-relaxed min-h-[160px] relative select-text"
         aria-label="Highlighted call transcript"
       >
         {segments.map((seg, idx) => {
           if (seg.type === "text") {
-            // Render redacted tokens as badges inside text
             const parts = seg.content.split(
               /(\[REDACTED_(?:AADHAAR|PAN|PHONE|OTP|UPI|CARD)\])/g
             );
@@ -148,15 +145,15 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
                     return (
                       <span
                         key={pIdx}
-                        className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded bg-cyan-950/90 border border-cyan-500/40 text-cyan-300 font-mono text-[11px] font-semibold tracking-wide"
-                        title="Pre-LLM PII Token: Real personal identifier masked before processing"
+                        className="inline-flex items-center gap-1 mx-1 px-1.5 py-0.5 rounded bg-zinc-800/90 border border-zinc-700 text-zinc-300 font-mono text-[11px] tabular-nums font-semibold"
+                        title="Pre-LLM Masked PII: Real identifier masked locally before processing"
                       >
-                        <Lock className="w-3 h-3 text-cyan-400" />
+                        <Lock className="w-3 h-3 text-zinc-400" strokeWidth={1.75} />
                         {p}
                       </span>
                     );
                   }
-                  return <span key={pIdx} className="text-zinc-200">{p}</span>;
+                  return <span key={pIdx} className="text-zinc-300">{p}</span>;
                 })}
               </span>
             );
@@ -169,11 +166,11 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
                 key={idx}
                 onMouseEnter={() => setActiveTooltip(seg.evidence!)}
                 onMouseLeave={() => setActiveTooltip(null)}
-                className={`inline-block mx-0.5 px-1.5 py-0.5 rounded cursor-pointer border ${style.bg} ${style.text} ${style.border} font-medium underline decoration-dotted transition-transform hover:scale-[1.02]`}
+                className={`inline-block mx-0.5 px-1.5 py-0.5 rounded cursor-pointer border ${style.bg} ${style.text} ${style.border} font-medium underline decoration-dotted transition-colors hover:brightness-110`}
                 title={`${style.label}: ${seg.evidence.explanation}`}
                 tabIndex={0}
                 role="button"
-                aria-label={`Flagged threat phrase: ${seg.content}. ${style.label}: ${seg.evidence.explanation}`}
+                aria-label={`Threat phrase: ${seg.content}. ${style.label}: ${seg.evidence.explanation}`}
               >
                 {seg.content}
               </span>
@@ -184,40 +181,40 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
         })}
 
         {isStreaming && (
-          <span className="inline-block w-2 h-4 bg-teal-400 ml-1 animate-pulse align-middle" />
+          <span className="inline-block w-1.5 h-3.5 bg-zinc-400 ml-1 animate-pulse align-middle" />
         )}
       </div>
 
-      {/* Hover / Click Explanation Tooltip Card */}
+      {/* Hover Tooltip Card */}
       {activeTooltip && (
-        <div className="p-2.5 rounded-lg bg-zinc-900 border border-white/20 text-xs flex items-start gap-2 shadow-xl animate-in fade-in duration-150">
-          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+        <div className="p-3 rounded-lg bg-[#161922] border border-zinc-700 text-xs flex items-start gap-2.5 shadow-xl animate-in fade-in duration-100">
+          <AlertCircle className="w-[18px] h-[18px] text-amber-400 shrink-0 mt-0.5" strokeWidth={1.75} />
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-white">
+              <span className="font-medium text-white">
                 Flagged: &quot;{activeTooltip.phrase}&quot;
               </span>
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
+              <span className="px-1.5 py-0.2 rounded font-mono text-[10px] font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
                 {CATEGORY_STYLES[activeTooltip.category].label} (+{activeTooltip.weight} pts)
               </span>
             </div>
-            <p className="text-zinc-400 text-[11px] mt-0.5">
+            <p className="text-zinc-400 text-[11px] mt-1 leading-relaxed">
               {activeTooltip.explanation}
             </p>
           </div>
         </div>
       )}
 
-      {/* Itemized PII Redactions Pill Row */}
+      {/* Itemized PII Redaction Badges */}
       {redactedItems.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 text-xs text-zinc-400 pt-1 border-t border-white/5">
-          <span className="text-[11px] text-zinc-500 font-medium">PII Masked:</span>
+        <div className="flex flex-wrap items-center gap-1.5 text-xs text-zinc-400 pt-1.5 border-t border-zinc-800/80">
+          <span className="text-[11px] text-zinc-500 font-mono">PII Redactions:</span>
           {redactedItems.map((item, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-900 border border-cyan-500/30 text-cyan-300 text-[11px] font-mono"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#0B0D11] border border-zinc-800 text-zinc-300 text-[11px] font-mono tabular-nums"
             >
-              <Lock className="w-3 h-3 text-cyan-400" />
+              <Lock className="w-3 h-3 text-zinc-400" strokeWidth={1.75} />
               {item.type} ({item.count})
             </span>
           ))}

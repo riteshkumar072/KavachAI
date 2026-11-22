@@ -18,16 +18,16 @@ export const ExplainablePanel: React.FC<ExplainablePanelProps> = ({
   level,
 }) => {
   return (
-    <section className="glass-panel p-4 flex flex-col gap-3">
-      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+    <section className="enterprise-card p-5 flex flex-col gap-3.5">
+      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5">
         <div className="flex items-center gap-2">
-          <BrainCircuit className="w-4 h-4 text-teal-400" />
-          <span className="font-semibold text-xs text-white uppercase tracking-wider">
-            Explainable AI (XAI) Threat Breakdown
+          <BrainCircuit className="w-[18px] h-[18px] text-zinc-300" strokeWidth={1.75} />
+          <span className="font-medium text-xs text-zinc-200 tracking-tight">
+            Explainable AI (XAI) Diagnostics
           </span>
         </div>
-        <span className="text-[11px] text-zinc-400">
-          Pattern: <strong className="text-zinc-200">{threatCategory}</strong>
+        <span className="text-[11px] text-zinc-400 font-mono">
+          Pattern: <strong className="text-zinc-200 font-sans">{threatCategory}</strong>
         </span>
       </div>
 
@@ -35,15 +35,15 @@ export const ExplainablePanel: React.FC<ExplainablePanelProps> = ({
       {tactics.length > 0 && (
         <div>
           <span className="text-[11px] text-zinc-400 font-medium block mb-1.5">
-            Psychological Vectors Detected:
+            Identified Threat Vectors:
           </span>
           <div className="flex flex-wrap gap-1.5">
             {tactics.map((tactic, idx) => (
               <span
                 key={idx}
-                className="px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-900 border border-white/10 text-zinc-300 flex items-center gap-1"
+                className="px-2.5 py-0.5 rounded text-[11px] font-medium bg-[#0B0D11] border border-zinc-800 text-zinc-300 flex items-center gap-1.5"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                 {tactic}
               </span>
             ))}
@@ -54,22 +54,22 @@ export const ExplainablePanel: React.FC<ExplainablePanelProps> = ({
       {/* Plain Language Reasons */}
       <div className="flex flex-col gap-1.5">
         <span className="text-[11px] text-zinc-400 font-medium">
-          Detailed Evidence & Logical Reasons:
+          Evidence &amp; Threat Breakdown:
         </span>
         <ul className="space-y-1.5 text-xs text-zinc-300">
           {explainableReasons.map((reason, idx) => (
             <li
               key={idx}
-              className="p-2 rounded bg-zinc-950/60 border border-white/5 flex items-start gap-2"
+              className="p-3 rounded-lg bg-[#0B0D11] border border-zinc-800/80 flex items-start gap-2.5 leading-relaxed"
             >
               {level === "CRITICAL" ? (
-                <AlertOctagon className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
+                <AlertOctagon className="w-[18px] h-[18px] text-rose-400 shrink-0 mt-0.5" strokeWidth={1.75} />
               ) : level === "CAUTION" ? (
-                <Info className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                <Info className="w-[18px] h-[18px] text-amber-400 shrink-0 mt-0.5" strokeWidth={1.75} />
               ) : (
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-[18px] h-[18px] text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.75} />
               )}
-              <span className="leading-snug">{reason}</span>
+              <span className="text-zinc-300">{reason}</span>
             </li>
           ))}
         </ul>

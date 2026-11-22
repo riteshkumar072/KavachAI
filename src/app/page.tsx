@@ -170,7 +170,7 @@ export default function Home() {
       />
 
       {/* Main Dashboard Grid */}
-      <main className="max-w-7xl mx-auto p-4 md:p-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+      <main className="max-w-7xl mx-auto p-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
         {/* Left Column (7/12 cols): Input Console & Live Transcript */}
         <div className="lg:col-span-7 flex flex-col gap-5">
           <InputConsole
@@ -247,9 +247,9 @@ export default function Home() {
       </main>
 
       {/* Accessible Footer Landmark */}
-      <footer className="border-t border-white/5 py-4 px-6 text-center text-xs text-zinc-500">
+      <footer className="border-t border-zinc-800/80 py-4 px-6 text-center text-xs text-zinc-500 font-mono">
         <p>
-          KavachAI &bull; Context-Aware Defensive Cyber Shield &bull; Strictly Defensive &bull; Zero Audio Stored &bull; National Cyber Crime Helpline: 1930
+          KavachAI &bull; Real-Time Defensive Cyber Command Center &bull; Zero Audio Stored &bull; National Helpline 1930
         </p>
       </footer>
     </div>

@@ -58,7 +58,7 @@ export const ActionShield: React.FC<ActionShieldProps> = ({
     }
   };
 
-  // Construct Privacy-Safe SOS alert for family
+  // Privacy-Safe SOS alert message
   const silentAlertText = `EMERGENCY ALERT: I am on a high-risk call flagged by KavachAI as "${threatCategory}". KavachAI advised me to disconnect immediately and not transfer funds or share OTPs. Please call me back right now! (National Helpline: 1930)`;
 
   const handleCopyAlert = () => {
@@ -71,50 +71,50 @@ export const ActionShield: React.FC<ActionShieldProps> = ({
 
   if (level === "SAFE") {
     return (
-      <section className="glass-panel p-4 flex flex-col items-center justify-center text-center gap-2 text-xs py-6">
-        <ShieldCheck className="w-8 h-8 text-emerald-400" />
+      <section className="enterprise-card p-5 flex flex-col items-center justify-center text-center gap-2 text-xs py-7">
+        <ShieldCheck className="w-[18px] h-[18px] text-emerald-400 mb-1" strokeWidth={1.75} />
         <h3 className="font-semibold text-sm text-white">Safe to Proceed</h3>
-        <p className="text-zinc-400 max-w-sm">
-          No manipulative coercion or fraudulent patterns detected. If caller demands OTPs, UPI PINs, or remote software, disconnect immediately.
+        <p className="text-zinc-400 max-w-sm leading-relaxed">
+          No manipulation or extortion patterns detected. If the caller requests OTPs, UPI PINs, or screen-sharing tools, terminate the call immediately.
         </p>
       </section>
     );
   }
 
   return (
-    <section className="glass-panel p-4 flex flex-col gap-4 border-red-500/30">
-      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+    <section className="enterprise-card p-5 flex flex-col gap-4 border-rose-500/30">
+      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-red-400" />
-          <span className="font-semibold text-xs text-white uppercase tracking-wider">
-            Active Defense & Safe Exit Script
+          <AlertTriangle className="w-[18px] h-[18px] text-rose-400" strokeWidth={1.75} />
+          <span className="font-medium text-xs text-zinc-200 tracking-tight">
+            Active Defense &amp; Safe Exit
           </span>
         </div>
-        <span className="text-[11px] text-red-400 font-semibold px-2 py-0.5 rounded bg-red-950/80 border border-red-500/30">
+        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">
           ACTION REQUIRED
         </span>
       </div>
 
       {/* Recommended Action Summary */}
-      <div className="p-2.5 rounded-lg bg-red-950/40 border border-red-500/20 text-xs text-red-200">
-        <strong className="text-white block mb-0.5">Recommended Defense Action:</strong>
+      <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs text-rose-200 leading-relaxed">
+        <strong className="text-white block mb-0.5 font-medium">Defense Directive:</strong>
         {recommendedAction}
       </div>
 
       {/* "Say This & Hang Up" Card */}
-      <div className="flex flex-col gap-2 p-3 rounded-lg bg-zinc-950/80 border border-white/10">
+      <div className="flex flex-col gap-2.5 p-3.5 rounded-lg bg-[#0B0D11] border border-zinc-800/80">
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-xs text-white">
-            Say This Firmly &amp; Hang Up:
+          <span className="font-medium text-xs text-zinc-200">
+            Say This &amp; Disconnect:
           </span>
 
-          {/* Hindi / English Toggle for Exit Script */}
-          <div className="flex items-center bg-zinc-900 border border-white/10 rounded-md p-0.5 text-[11px]">
+          {/* Hindi / English Switcher */}
+          <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-md p-0.5 text-[11px] font-mono">
             <button
               onClick={() => setOverrideLang("en")}
-              className={`px-2 py-0.5 rounded ${
+              className={`px-2 py-0.5 rounded transition-colors ${
                 activeLang === "en"
-                  ? "bg-teal-500 text-zinc-950 font-bold"
+                  ? "bg-zinc-800 text-white font-medium"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -122,9 +122,9 @@ export const ActionShield: React.FC<ActionShieldProps> = ({
             </button>
             <button
               onClick={() => setOverrideLang("hi")}
-              className={`px-2 py-0.5 rounded ${
+              className={`px-2 py-0.5 rounded transition-colors ${
                 activeLang === "hi"
-                  ? "bg-teal-500 text-zinc-950 font-bold"
+                  ? "bg-zinc-800 text-white font-medium"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -134,94 +134,94 @@ export const ActionShield: React.FC<ActionShieldProps> = ({
         </div>
 
         {/* Script Content */}
-        <p className="text-sm text-zinc-100 font-medium italic p-2.5 rounded bg-zinc-900/90 border border-white/5 leading-relaxed">
+        <p className="text-xs text-zinc-100 italic p-3 rounded bg-zinc-900/80 border border-zinc-800 leading-relaxed">
           &quot;{activeScript}&quot;
         </p>
 
-        {/* Buttons: Speak Script & Copy Script */}
-        <div className="flex flex-wrap items-center gap-2 mt-1">
+        {/* Script Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2 mt-0.5">
           <button
             onClick={handleSpeak}
-            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+            className={`h-8 px-3 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
               isSpeaking
-                ? "bg-red-500 text-white"
-                : "bg-teal-500 text-zinc-950 hover:bg-teal-400 shadow-sm"
+                ? "bg-rose-500 text-white"
+                : "bg-white text-black hover:bg-zinc-200 shadow-sm"
             }`}
           >
-            <Volume2 className="w-3.5 h-3.5" />
+            <Volume2 className="w-[18px] h-[18px]" strokeWidth={1.75} />
             <span>{isSpeaking ? "Stop Voice" : "Speak Script Aloud"}</span>
           </button>
 
           <button
             onClick={handleCopyScript}
-            className="px-2.5 py-1.5 rounded-md bg-zinc-800 border border-white/10 text-zinc-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors"
+            className="h-8 px-2.5 rounded-md bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white hover:bg-zinc-700 text-xs font-medium flex items-center gap-1.5 transition-colors"
           >
             {copiedScript ? (
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <Check className="w-[18px] h-[18px] text-emerald-400" strokeWidth={1.75} />
             ) : (
-              <Copy className="w-3.5 h-3.5" />
+              <Copy className="w-[18px] h-[18px]" strokeWidth={1.75} />
             )}
-            <span>{copiedScript ? "Copied!" : "Copy Script"}</span>
+            <span>{copiedScript ? "Copied" : "Copy Script"}</span>
           </button>
         </div>
       </div>
 
       {/* "Silent Family Alert" SOS Card */}
-      <div className="flex flex-col gap-2 p-3 rounded-lg bg-zinc-950/80 border border-white/10">
+      <div className="flex flex-col gap-2.5 p-3.5 rounded-lg bg-[#0B0D11] border border-zinc-800/80">
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-xs text-white">
-            Silent Family Alert (Privacy-Safe SOS):
+          <span className="font-medium text-xs text-zinc-200">
+            Silent Family Alert (SOS):
           </span>
-          <span className="text-[10px] text-emerald-400 font-medium">
-            Zero Personal Info Shared
+          <span className="text-[10px] text-zinc-400 font-mono">
+            Zero PII Included
           </span>
         </div>
 
-        <p className="text-xs text-zinc-400 line-clamp-2 bg-zinc-900 p-2 rounded border border-white/5 font-mono text-[11px]">
+        <p className="text-[11px] text-zinc-400 font-mono line-clamp-2 bg-zinc-900/80 p-2.5 rounded border border-zinc-800">
           {silentAlertText}
         </p>
 
-        <div className="flex flex-wrap items-center gap-2 mt-1">
+        <div className="flex flex-wrap items-center gap-2 mt-0.5">
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+            className="h-8 px-3 rounded-md bg-[#25D366]/20 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/30 text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
-            <Send className="w-3.5 h-3.5" />
-            <span>1-Click WhatsApp SOS</span>
+            <Send className="w-[18px] h-[18px]" strokeWidth={1.75} />
+            <span>WhatsApp Alert</span>
           </a>
 
           <button
             onClick={handleCopyAlert}
-            className="px-2.5 py-1.5 rounded-md bg-zinc-800 border border-white/10 text-zinc-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors"
+            className="h-8 px-2.5 rounded-md bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white hover:bg-zinc-700 text-xs font-medium flex items-center gap-1.5 transition-colors"
           >
             {copiedAlert ? (
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <Check className="w-[18px] h-[18px] text-emerald-400" strokeWidth={1.75} />
             ) : (
-              <Copy className="w-3.5 h-3.5" />
+              <Copy className="w-[18px] h-[18px]" strokeWidth={1.75} />
             )}
-            <span>{copiedAlert ? "Copied SOS!" : "Copy Alert"}</span>
+            <span>{copiedAlert ? "Copied" : "Copy SOS"}</span>
           </button>
         </div>
       </div>
 
-      {/* Official Indian Cyber Crime Helpline Banner */}
-      <div className="p-2.5 rounded-lg bg-zinc-900 border border-red-500/30 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2 text-red-300">
-          <PhoneCall className="w-4 h-4 text-red-400" />
+      {/* Helpline Reference */}
+      <div className="p-3 rounded-lg bg-[#0B0D11] border border-zinc-800/80 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2 text-rose-300">
+          <PhoneCall className="w-[18px] h-[18px] text-rose-400" strokeWidth={1.75} />
           <span>
-            National Cyber Crime Helpline: <strong className="text-white">1930</strong>
+            Cyber Helpline: <strong className="text-white font-mono tabular-nums">1930</strong>
           </span>
         </div>
         <a
           href="https://cybercrime.gov.in"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-zinc-400 hover:text-white flex items-center gap-1 text-[11px] underline"
+          className="text-zinc-400 hover:text-white flex items-center gap-1 text-[11px] font-mono underline"
         >
           <span>cybercrime.gov.in</span>
-          <ExternalLink className="w-3 h-3" />
+          <ExternalLink className="w-3 h-3 text-zinc-400" strokeWidth={1.75} />
         </a>
       </div>
     </section>
