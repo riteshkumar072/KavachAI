@@ -1,69 +1,257 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState, useCallback, useRef } from "react";
+import {
+  UserPersonaId,
+  SupportedLanguage,
+  UnifiedAnalysisResult,
+  AnalysisEngineUsed,
+} from "@/types/kavach";
+import { TopBar } from "@/components/TopBar";
+import { PrivacyAuditBar } from "@/components/PrivacyAuditBar";
+import { InputConsole } from "@/components/InputConsole";
+import { TranscriptViewer } from "@/components/TranscriptViewer";
+import { ThreatGauge } from "@/components/ThreatGauge";
+import { ExplainablePanel } from "@/components/ExplainablePanel";
+import { ActionShield } from "@/components/ActionShield";
+import { useLiveSimulator } from "@/hooks/useLiveSimulator";
+import { useSpeechInput } from "@/hooks/useSpeechInput";
+import { analyzeHybrid } from "@/core/engine/hybridAnalyzer";
+import { triggerThreatVoiceAlert } from "@/utils/voiceAlert";
+import { PERSONA_CONFIGS } from "@/core/context/personaRules";
 
 export default function Home() {
+  // Global State
+  const [persona, setPersona] = useState<UserPersonaId>("senior_citizen");
+  const [language, setLanguage] = useState<SupportedLanguage>("en");
+  const [seniorMode, setSeniorMode] = useState<boolean>(false);
+  const [voiceAlertEnabled, setVoiceAlertEnabled] = useState<boolean>(true);
+
+  // Input Mode State
+  const [activeTab, setActiveTab] = useState<"simulator" | "mic" | "paste">("simulator");
+  const [activeText, setActiveText] = useState<string>("");
+  const [pastedText, setPastedText] = useState<string>("");
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+
+  // Analysis Result
+  const [result, setResult] = useState<UnifiedAnalysisResult | null>(null);
+
+  // Debounce ref to avoid analyzing on every single keystroke
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Live Threat Analyzer Runner
+  const runAnalysis = useCallback(
+    async (textToAnalyze: string, targetPersona: UserPersonaId) => {
+      if (!textToAnalyze || textToAnalyze.trim().length === 0) {
+        setResult(null);
+        return;
+      }
+
+      setIsAnalyzing(true);
+      try {
+        // Attempt API route first for realistic server-side audit
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: textToAnalyze,
+            persona: targetPersona,
+            language,
+          }),
+        });
+
+        if (res.ok) {
+          const data: UnifiedAnalysisResult = await res.json();
+          setResult(data);
+          if (voiceAlertEnabled && data.threatLevel === "CRITICAL") {
+            triggerThreatVoiceAlert("CRITICAL", language);
+          }
+        } else {
+          // Direct in-memory fallback if API encounters network issue
+          const fallbackData = await analyzeHybrid(textToAnalyze, targetPersona, language);
+          setResult(fallbackData);
+          if (voiceAlertEnabled && fallbackData.threatLevel === "CRITICAL") {
+            triggerThreatVoiceAlert("CRITICAL", language);
+          }
+        }
+      } catch (err) {
+        console.warn("API route fetch error, using client-side fallback engine:", err);
+        const clientData = await analyzeHybrid(textToAnalyze, targetPersona, language);
+        setResult(clientData);
+        if (voiceAlertEnabled && clientData.threatLevel === "CRITICAL") {
+          triggerThreatVoiceAlert("CRITICAL", language);
+        }
+      } finally {
+        setIsAnalyzing(false);
+      }
+    },
+    [language, voiceAlertEnabled]
+  );
+
+  // Hook for Simulator
+  const handleSimulationLine = useCallback(
+    (streamedText: string) => {
+      setActiveText(streamedText);
+      runAnalysis(streamedText, persona);
+    },
+    [persona, runAnalysis]
+  );
+
+  const simulator = useLiveSimulator(handleSimulationLine);
+
+  // Hook for Speech Input
+  const handleSpeechChange = useCallback(
+    (speechText: string) => {
+      setActiveText(speechText);
+      runAnalysis(speechText, persona);
+    },
+    [persona, runAnalysis]
+  );
+
+  const speech = useSpeechInput(language, handleSpeechChange);
+
+  const handlePersonaChange = (newPersona: UserPersonaId) => {
+    setPersona(newPersona);
+    if (activeText.trim().length > 0) {
+      runAnalysis(activeText, newPersona);
+    }
+  };
+
+  const handleScenarioSelect = (scenarioId: string, targetPersona: UserPersonaId) => {
+    setPersona(targetPersona);
+    simulator.reset();
+    simulator.start(scenarioId);
+  };
+
+  const handlePastedTextChange = (text: string) => {
+    setPastedText(text);
+    setActiveText(text);
+
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+      runAnalysis(text, persona);
+    }, 400);
+  };
+
+  const handleAnalyzePasted = () => {
+    if (pastedText.trim().length > 0) {
+      setActiveText(pastedText);
+      runAnalysis(pastedText, persona);
+    }
+  };
+
+  const personaConfig = PERSONA_CONFIGS[persona];
+  const engineUsed: AnalysisEngineUsed = result ? result.engineUsed : "TIER_1_LOCAL";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div
+      className="min-h-screen flex flex-col bg-[#09090b] text-zinc-100"
+      data-a11y={seniorMode ? "high-contrast" : "default"}
+    >
+      {/* Top Header Bar */}
+      <TopBar
+        persona={persona}
+        onPersonaChange={handlePersonaChange}
+        language={language}
+        onLanguageChange={setLanguage}
+        seniorMode={seniorMode}
+        onSeniorModeToggle={() => setSeniorMode((prev) => !prev)}
+        voiceAlertEnabled={voiceAlertEnabled}
+        onVoiceAlertToggle={() => setVoiceAlertEnabled((prev) => !prev)}
+        engineUsed={engineUsed}
+      />
+
+      {/* Privacy & Security Audit Strip */}
+      <PrivacyAuditBar
+        redactedItems={result?.redaction.redactedItems || []}
+        totalRedacted={result?.redaction.totalRedacted || 0}
+        engineUsed={engineUsed}
+        tier1LatencyMs={result?.telemetry.tier1LatencyMs || 0}
+      />
+
+      {/* Main Dashboard Grid */}
+      <main className="max-w-7xl mx-auto p-4 md:p-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+        {/* Left Column (7/12 cols): Input Console & Live Transcript */}
+        <div className="lg:col-span-7 flex flex-col gap-5">
+          <InputConsole
+            activeTab={activeTab}
+            onTabChange={(tab) => {
+              setActiveTab(tab);
+              if (tab === "simulator") {
+                setActiveText(simulator.accumulatedText);
+              } else if (tab === "mic") {
+                simulator.pause();
+                setActiveText(speech.transcript);
+              } else {
+                simulator.pause();
+                setActiveText(pastedText);
+              }
+            }}
+            simulator={simulator}
+            speech={speech}
+            pastedText={pastedText}
+            onPastedTextChange={handlePastedTextChange}
+            onAnalyzePasted={handleAnalyzePasted}
+            onScenarioSelect={handleScenarioSelect}
+            isAnalyzing={isAnalyzing}
+          />
+
+          <TranscriptViewer
+            text={activeText}
+            evidences={result?.evidences || []}
+            redactedItems={result?.redaction.redactedItems || []}
+            isStreaming={simulator.isPlaying && !simulator.isPaused}
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Right Column (5/12 cols): Active Defense & Threat Meter */}
+        <div className="lg:col-span-5 flex flex-col gap-5">
+          <ThreatGauge
+            score={result?.finalScore || 0}
+            level={result?.threatLevel || "SAFE"}
+            telemetry={
+              result?.telemetry || {
+                tier1LatencyMs: 0,
+                totalLatencyMs: 0,
+                llmCalled: false,
+                cacheHit: false,
+              }
+            }
+            personaLabel={personaConfig.label}
+          />
+
+          <ExplainablePanel
+            threatCategory={result?.threatCategory || "Benign Communication"}
+            tactics={result?.tactics || []}
+            explainableReasons={
+              result?.explainableReasons || [
+                "No coercive, urgency, or isolation tactics detected.",
+              ]
+            }
+            level={result?.threatLevel || "SAFE"}
+          />
+
+          <ActionShield
+            tailoredExitScript={
+              result?.tailoredExitScript ||
+              personaConfig.fallbackExitScripts.AUTHORITY_IMPERSONATION
+            }
+            language={language}
+            recommendedAction={
+              result?.recommendedAction || personaConfig.defaultActionGuidance.en
+            }
+            level={result?.threatLevel || "SAFE"}
+            threatCategory={result?.threatCategory || "Scam Coercion"}
+          />
         </div>
       </main>
+
+      {/* Accessible Footer Landmark */}
+      <footer className="border-t border-white/5 py-4 px-6 text-center text-xs text-zinc-500">
+        <p>
+          KavachAI &bull; Context-Aware Defensive Cyber Shield &bull; Strictly Defensive &bull; Zero Audio Stored &bull; National Cyber Crime Helpline: 1930
+        </p>
+      </footer>
     </div>
   );
 }
