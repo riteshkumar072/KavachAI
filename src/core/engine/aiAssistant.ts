@@ -157,7 +157,13 @@ export async function queryTier2AI(
     });
 
     const textOutput = response.text?.trim() || "";
-    const parsedJson = JSON.parse(textOutput);
+    // Clean any accidental markdown code fences (e.g., ```json ... ```)
+    const cleanedText = textOutput
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+
+    const parsedJson = JSON.parse(cleanedText);
     const validation = Tier2ResponseSchema.safeParse(parsedJson);
 
     if (validation.success) {
